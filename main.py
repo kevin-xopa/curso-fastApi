@@ -2,29 +2,88 @@
 from asyncio import streams
 from typing import Optional
 from anyio import Path
+from enum import Enum
 
 #  Pydantic
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 # FastAPI
 from fastapi import FastAPI, Body, Query, Path
 
 app = FastAPI()
 
+# ENUMS
+
+
+class HairColor(Enum):
+    white = 'white',
+    brow = 'brow'
+    red = 'red'
+    blonde = 'blonde'
+    black = 'black'
 
 # Models
+
+
 class Location(BaseModel):
-    city: str
-    state: str
-    county: str
+    city: str = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+        example="Cholula"
+    )
+    state: str = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+        example="Puebla"
+    )
+    county: str = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+        example="Mexico"
+    )
 
 
 class Person(BaseModel):
-    first_name: str
-    last_name: str
-    age: int
-    hair_color: Optional[str] = None
-    is_married: Optional[bool] = None
+    first_name: str = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+        example="Kevin"
+    )
+    last_name: str = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+        example="Xopa"
+    )
+    age: int = Field(
+        ...,
+        gt=0,
+        le=115,
+        example=21
+    )
+    hair_color: Optional[HairColor] = Field(
+        default=None,
+        example="black"
+    )
+    is_married: Optional[bool] = Field(
+        default=None,
+        example=False,
+    )
+
+    # class Config:
+    #     schema_extra = {
+    #         "example": {
+    #             "first_name" : "Kevin",
+    #             "last_name" : "Ochoa Xopa",
+    #             "age" : 21,
+    #             "hair_color" : "black",
+    #             "is_married" : False,
+    #         }
+    #     }
 
 
 @app.get("/")
@@ -81,12 +140,13 @@ def update_person(
         gt=0
     ),
     person: Person = Body(...),
-    location: Location = Body(...),
+    # location: Location = Body(...),
 ):
-    result = dict(person)
-    result.update(dict(location))
+    # result = dict(person)
+    # result.update(dict(location))
 
     # FastAPI no support the sintatxis
     # person.dict() & location.dict()
 
-    return result
+    # return result
+    return person
