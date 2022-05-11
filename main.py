@@ -1,6 +1,7 @@
 # Python
 from asyncio import streams
 from typing import Optional
+from unittest.mock import Base
 from anyio import Path
 from enum import Enum
 
@@ -25,28 +26,7 @@ class HairColor(Enum):
 # Models
 
 
-class Location(BaseModel):
-    city: str = Field(
-        ...,
-        min_length=1,
-        max_length=200,
-        example="Cholula"
-    )
-    state: str = Field(
-        ...,
-        min_length=1,
-        max_length=200,
-        example="Puebla"
-    )
-    county: str = Field(
-        ...,
-        min_length=1,
-        max_length=200,
-        example="Mexico"
-    )
-
-
-class Person(BaseModel):
+class PersonBase(BaseModel):
     first_name: str = Field(
         ...,
         min_length=1,
@@ -73,6 +53,11 @@ class Person(BaseModel):
         default=None,
         example=False,
     )
+    password: str = Field(..., min_length=8)
+
+
+class Person(PersonBase):
+    password: str = Field(..., min_length=8)
 
     # class Config:
     #     schema_extra = {
@@ -86,13 +71,38 @@ class Person(BaseModel):
     #     }
 
 
+class PersonOut(PersonBase):
+    pass
+
+
+class Location(BaseModel):
+    city: str = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+        example="Cholula"
+    )
+    state: str = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+        example="Puebla"
+    )
+    county: str = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+        example="Mexico"
+    )
+
+
 @app.get("/")
 def home():
     return {'Hello': 'world'}
 
 
 # Request and Response Body
-@app.post("/person/new")
+@app.post("/person/new", response_model=PersonOut)
 def create_person(person: Person = Body(...)):
     return person
 
@@ -102,7 +112,8 @@ def create_person(person: Person = Body(...)):
 @app.get("/person/details")
 def show_person(
     name: Optional[str] = Query(
-        None, min_length=1,
+        None,
+        min_length=1,
         max_length=50,
         title="Person name",
         description="This is the person name, It;s between 1 and 50 characters",
