@@ -1,15 +1,16 @@
 # Python
 from asyncio import streams
+from email.mime import message
 from typing import Optional
 from unittest.mock import Base
 from anyio import Path
 from enum import Enum
 
 #  Pydantic
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 # FastAPI
-from fastapi import FastAPI, Body, Query, Path, status, Form
+from fastapi import FastAPI, Body, Query, Path, status, Form, Header, Cookie
 
 app = FastAPI()
 
@@ -184,6 +185,7 @@ def update_person(
     return person
 
 
+# Forms
 @app.post(
     path="/login",
     response_model=LoginOut,
@@ -194,3 +196,33 @@ def login(
         password: str = Form(...)
 ):
     return LoginOut(username=username, password=password)
+
+# Cookies and Headers Parameters
+
+
+@app.post(
+    path="/contact",
+    status_code=status.HTTP_200_OK
+)
+def contact(
+    firs_name: str = Form(
+        ...,
+        max_length=20,
+        min_length=1,
+    ),
+    last_name: str = Form(
+        ...,
+        max_length=20,
+        min_length=1,
+    ),
+    email: EmailStr = Form(
+        ...,
+    ),
+    message: str = Form(
+        ...,
+        min_length=20,
+    ),
+    user_agent: Optional[str] = Header(default=None),
+    ads: Optional[str] = Cookie(default=None)
+):
+    return user_agent
