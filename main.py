@@ -1,16 +1,15 @@
 # Python
-from asyncio import streams
-from email.mime import message
 from typing import Optional
-from unittest.mock import Base
-from anyio import Path
 from enum import Enum
 
 #  Pydantic
 from pydantic import BaseModel, EmailStr, Field
 
 # FastAPI
-from fastapi import FastAPI, Body, Query, Path, status, Form, Header, Cookie, UploadFile, File
+from fastapi import FastAPI
+from fastapi import status
+from fastapi import HTTPException
+from fastapi import Body, Query, Path, Form, Header, Cookie, UploadFile, File
 
 app = FastAPI()
 
@@ -149,6 +148,9 @@ def show_person(
 # Validations: Path Parameters
 
 
+persons = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+
 @ app.get("/person/detail/{person_id}")
 def show_person(
     person_id: int = Path(
@@ -159,6 +161,11 @@ def show_person(
         example=42
     )
 ):
+    if person_id not in persons:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="This person doest't exist"
+        )
     return {person_id: "It exists!"}
 
 
